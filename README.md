@@ -40,9 +40,9 @@ $\color{red}{我的微信(WeChat): BatAug，欢迎交流与合作}$
 **Fig.2.** Directory structure. There are four folders and one main.py file in EU2ADL_TGRS-main.
 
 ### checkpoints
-这个文件夹用于储存训练中的所有结果，这里给出了TG数据的示例。如果你直接运行main.py,将会在`TG_SF12_endnum130_fl0.8_blo3_A100_B100_C10_E0.01__use_ATV1_CMMIYes_blindYes`文件夹中生成以下的这些文件
+这个文件夹用于储存训练中的所有结果，这里给出了TG数据的示例。如果你直接运行main.py,将会在`TG_SF12_endnum160_A100_B100_C10_D1_E0.01_block_num_3_use_perNo_use_semiYes_blindYes`文件夹中生成以下的这些文件
 
-This folder is used to store the results and a folder named `TG_SF12_endnum130_fl0.8_blo3_A100_B100_C10_E0.01__use_ATV1_CMMIYes_blindYes` is given as an example.
+This folder is used to store the results and a folder named `TG_SF12_endnum160_A100_B100_C10_D1_E0.01_block_num_3_use_perNo_use_semiYes_blindYes` is given as an example.
 
 - `BlindNet.pth` is the trained parameters of the degradation model. 因为本方法是盲融合，因此需要估计未知的PSF和SRF
 
@@ -65,10 +65,10 @@ This folder is used to store the results and a folder named `TG_SF12_endnum130_f
 ### data
 This folder is used to store the ground true HSI and corresponding spectral response of multispectral imager, aiming to generate the simulated inputs. The TianGong-1 HSI data and spectral response of WorldView 2 multispectral imager are given as an example here.
 
-这里给出了一个示例。XINet文件里的TG文件夹是TG数据的真值，spectral_response是用来仿真HrMSI的光谱响应函数。
+这里给出了一个示例。EU2ADL文件里的TG文件夹是TG数据的真值，spectral_response是用来仿真HrMSI的光谱响应函数。
 
 ### model
-This folder consists of six .py files, including 
+This folder consists of eight .py files, including 
 - `__init__.py`
 
 - `config.py`: all the hyper-parameters can be adjusted here. 本方法所有需要调整的参数，包含数据读取地址以及模型超参数等
@@ -79,9 +79,11 @@ This folder consists of six .py files, including
 
 - `read_data.py`: read and simulate data. 读取数据和仿真数据
 
-- `fusion.py`: XINet. 重建融合主网络
+- `fusion.py`:EU2ADL. 重建融合主网络
 
-- `srf_psf_layer.py`: the network to estimate PSF and SRF. 用于估计PSF和SRF，作为XINet的输入
+- `fusion_simple.py`: EU2ADL without PSOS-Net. 没有PSOS-Net的重建融合主网络，用于消融实验
+
+- `srf_psf_attention.py`: the network to estimate PSF and SRF. 用于估计PSF和SRF，作为EU2ADL的输入
 
 ### utils
 This folder consists of four .py files, including 
@@ -101,7 +103,7 @@ This folder consists of four .py files, including
 
 2. Parameters: all the parameters need fine-tunning can be found in `config.py`. 本方法所有需要调整的参数都在此.py中
 
-3. Data: put your HSI data and MSI spectral response in `./data/XINet/TG` and `./data/XINet/spectral_response`, respectively. The TianGong-1 HSI data and spectral response of WorldView 2 multispectral imager are given as an example here.
+3. Data: put your HSI data and MSI spectral response in `./data/EU2ADL/TG` and `./data/EU2ADL/spectral_response`, respectively. The TianGong-1 HSI data and spectral response of WorldView 2 multispectral imager are given as an example here.
 
   将你的高光谱数据以及用于仿真HrMSI的光谱响应放到对应文件夹中，这里用TG数据作为示例
 
@@ -119,20 +121,21 @@ This folder consists of four .py files, including
   
 5. Run: just simply run `main.py` after adjusting the parameters in `config.py`.
   在对应文件夹放置你的数据后，调整 `config.py`后的参数，即可运行`main.py`
-6. Results: one folder named `TG_SF12_endnum130_fl0.8_blo3_A100_B100_C10_E0.01__use_ATV1_CMMIYes_blindYes` will be generated once `main.py` is run and all the results will be stored in the new folder. Also, you can observe the training process in the above-opened site via Visdom.
-  当你运行本代码后，将会生成`TG_SF12_endnum130_fl0.8_blo3_A100_B100_C10_E0.01__use_ATV1_CMMIYes_blindYes` 文件夹，里面存储所有结果.
+
+  **当你觉得效果欠佳时，可以调整里面的 -endmember_num 个数。**
+  
+7. Results: one folder named `TG_SF12_endnum160_A100_B100_C10_D1_E0.01_block_num_3_use_perNo_use_semiYes_blindYes` will be generated once `main.py` is run and all the results will be stored in the new folder. Also, you can observe the training process in the above-opened site via Visdom.
+  当你运行本代码后，将会生成`TG_SF12_endnum160_A100_B100_C10_D1_E0.01_block_num_3_use_perNo_use_semiYes_blindYes` 文件夹，里面存储所有结果.
 
   同时，你可以在刚才打开的网站里实时监控整个训练过程,如下图所见.
 
   6.1 左上角代表每个损失随着训练的变化过程。左下角分别是学习率的变化以及PSNR-SAM的变化。
   
   6.2 中间可视化6张图。第一列分别是LrHSI HrMSI HrHSI真值，右侧分别代表自编码器重建出来的结果
-
   
   **注意：当你发现第二列一直为黑色，可以中断程序，换一个随机种子再次运行**
   
   6.3 右侧两张图。上方lrhsi真值以及自编码重建出来的lrhsi在相同位置的光谱曲线，下方代表HrHSI以及重建HrHSI在相同位置的光谱曲线。注意：在每轮可视化的时候，选取的像素位置都会变化。
-
 
 <img src="./Imgs/fig3.png" width="2000px"/>
 
